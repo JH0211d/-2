@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>إضافة نباتات</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: center;
+      background-color: #e9f7ef;
+      padding: 20px;
+    }
+    input, button, textarea {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background-color: #d4efdf;
+      margin: 5px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    img.logo {
+      width: 150px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/2/2b/University_of_Jordan_Logo.svg/800px-University_of_Jordan_Logo.svg.png" alt="شعار الجامعة الأردنية" class="logo">
+
+  <h1>صفحة إضافة نباتات</h1>
+
+  <input type="text" id="plantName" placeholder="اسم النبتة"><br>
+  <textarea id="plantDesc" placeholder="وصف النبتة" rows="3" cols="30"></textarea><br>
+  <input type="file" id="plantImage" accept="image/*"><br>
+
+  <button onclick="addPlant()">إضافة</button>
+  <button onclick="clearPlants()">مسح كل النباتات</button>
+
+  <h2>النباتات المُضافة:</h2>
+  <ul id="plantList"></ul>
+
+  <script>
+    window.onload = function () {
+      const savedPlants = JSON.parse(localStorage.getItem('plants')) || [];
+      savedPlants.forEach(plant => addPlantToList(plant));
+    };
+
+    function addPlant() {
+      const name = document.getElementById('plantName').value.trim();
+      const desc = document.getElementById('plantDesc').value.trim();
+      const imageInput = document.getElementById('plantImage');
+
+      if (name !== '' && desc !== '') {
+        if (imageInput.files && imageInput.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const plant = {
+              name,
+              desc,
+              image: e.target.result
+            };
+            saveAndDisplay(plant);
+          };
+          reader.readAsDataURL(imageInput.files[0]);
+        } else {
+          const plant = { name, desc, image: '' };
+          saveAndDisplay(plant);
+        }
+      } else {
+        alert('يرجى كتابة اسم ووصف النبتة');
+      }
+    }
+
+    function saveAndDisplay(plant) {
+      addPlantToList(plant);
+      const savedPlants = JSON.parse(localStorage.getItem('plants')) || [];
+      savedPlants.push(plant);
+      localStorage.setItem('plants', JSON.stringify(savedPlants));
+      document.getElementById('plantName').value = '';
+      document.getElementById('plantDesc').value = '';
+      document.getElementById('plantImage').value = '';
+    }
+
+    function addPlantToList(plant) {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${plant.name}</strong><br><em>${plant.desc}</em><br>`;
+      if (plant.image) {
+        li.innerHTML += `<img src="${plant.image}" alt="صورة النبتة" width="150"><br>`;
+      }
+      document.getElementById('plantList').appendChild(li);
+    }
+
+    function clearPlants() {
+      if (confirm('هل أنت متأكد أنك تريد مسح كل النباتات؟')) {
+        localStorage.removeItem('plants');
+        document.getElementById('plantList').innerHTML = '';
+      }
+    }
+  </script>
+
+</body>
+</html>
